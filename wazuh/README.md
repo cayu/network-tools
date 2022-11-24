@@ -18,10 +18,12 @@ Integración de Wazuh con Fortinet
 </remote>
 
 <ossec_config>
-<remote>
-<connection>syslog</connection>
-<allowed-ips>192.168.1.0/24</allowed-ips>
-</remote>
+  <remote>
+    <connection>syslog</connection>
+    <port>514</port>
+    <protocol>udp</protocol>
+    <allowed-ips>0.0.0.0/0</allowed-ips>
+  </remote>
 </ossec_config>
 ```
 
