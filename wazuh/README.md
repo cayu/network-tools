@@ -1,5 +1,7 @@
 Integración de Wazuh con Fortinet
 
+Hoy en dia esto ya no es necesario : https://github.com/wazuh/wazuh-kibana-app/issues/1884
+
 - /var/ossec/etc/decoders/custom_fortigate_decoders.xml
 - /var/ossec/etc/rules/custom_fortigate_rules.xml
 
@@ -8,15 +10,24 @@ Integración de Wazuh con Fortinet
 # chmod 660 /var/ossec/etc/rules/custom_fortigate_rules.xml
 ```
 
+
+Ya están presentes estas configuraciones en /var/ossec
+
+```
+./ruleset/decoders/0100-fortigate_decoders.xml
+./ruleset/decoders/0101-fortiddos_decoders.xml
+./ruleset/decoders/0102-fortimail_decoders.xml
+./ruleset/decoders/0103-fortiauth_decoders.xml
+./ruleset/rules/0390-fortiddos_rules.xml
+./ruleset/rules/0391-fortigate_rules.xml
+./ruleset/rules/0392-fortimail_rules.xml
+./ruleset/rules/0393-fortiauth_rules.xml
+```
+
+Si hay que habilitar el servicio de Syslog en Wazuh
+
 /var/ossec/etc/ossec.conf
 ```
-<remote>
-<connection>syslog</connection>
-<allowed-ips>your-device-ip-1</allowed-ips>
-<allowed-ips>your-device-ip-2</allowed-ips>
-<allowed-ips>your-device-ip-3</allowed-ips>
-</remote>
-
 <ossec_config>
   <remote>
     <connection>syslog</connection>
@@ -26,8 +37,7 @@ Integración de Wazuh con Fortinet
   </remote>
 </ossec_config>
 ```
-
-Fortigate CLI
+Y en el FortiGate desde la CLI debemos aplicar una configuración similar a esta :
 ```
 # config global
 # config log syslogd setting
@@ -43,6 +53,3 @@ Fortigate CLI
     set interface-select-method auto
 end
 ``
-
-Source :
-https://github.com/wazuh/wazuh-kibana-app/issues/1884
