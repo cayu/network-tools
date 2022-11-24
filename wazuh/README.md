@@ -25,5 +25,22 @@ Integración de Wazuh con Fortinet
 </ossec_config>
 ```
 
+Fortigate CLI
+```
+# config global
+# config log syslogd setting
+    set status enable
+    set server "192.168.3.2"
+    set mode udp
+    set port 514
+    set facility local7
+    set source-ip '192.168.2.1'
+    set format default
+    set priority default
+    set max-log-rate 0
+    set interface-select-method auto
+end
+``
+
 Source :
 https://github.com/wazuh/wazuh-kibana-app/issues/1884
