@@ -1,0 +1,93 @@
+<decoder name="fortigate-custom">
+ <prematch>^date=\d\d\d\d-\d\d-\d\d time=\d\d:\d\d:\d\d devname=</prematch>
+</decoder>
+
+<decoder name="fortigate-custom1">
+ <parent>fortigate-custom</parent>
+ <regex>^date=(\d\d\d\d-\d\d-\d\d) time=(\d\d:\d\d:\d\d) devname=</regex>
+ <order>date, time, srcip</order>
+</decoder>
+
+<decoder name="fortigate-custom1">
+ <parent>fortigate-custom</parent>
+ <regex offset="after_regex">"(\S+)" devid="(\S+)" logid="(\S+)" type="(\S+)" subtype="(\S+)" </regex>
+ <order>devname, devid, logid, type, subtype</order>
+</decoder>
+
+<decoder name="fortigate-custom1">
+ <parent>fortigate-custom</parent>
+ <regex offset="after_regex"> eventtype="(\S+)"</regex>
+ <order>eventtype</order>
+</decoder>
+
+<decoder name="fortigate-custom1">
+ <parent>fortigate-custom</parent>
+ <regex offset="after_regex">level="(\S+)" </regex>
+ <order>level</order>
+</decoder>
+
+<decoder name="fortigate-custom1">
+ <parent>fortigate-custom</parent>
+ <regex offset="after_regex">vd="(\S+)" </regex>
+ <order>vd</order>
+</decoder>
+
+<decoder name="fortigate-custom1">
+ <parent>fortigate-custom</parent>
+ <regex offset="after_regex">eventtime=(\S+) </regex>
+ <order>eventtime</order>
+</decoder>
+
+<decoder name="fortigate-custom1">
+ <parent>fortigate-custom</parent>
+ <regex offset="after_regex">srcip=(\S+) srcport=(\S+) srcintf="(\S+)" srcintfrole="(\S+)" dstip=(\S+) dstport=(\S+) dstintf="(\S+)" dstintfrole="(\S+)" </regex>
+ <order>srcip, srcport, srcintf, srcintfrole, dstip, dstport, dstintf, dstintfrole</order>
+</decoder>
+
+<decoder name="fortigate-custom1">
+ <parent>fortigate-custom</parent>
+ <regex offset="after_regex">srcip=(\S+) srcname="(\S+)" srcport=(\S+) srcintf="(\S+)" srcintfrole="(\S+)" dstip=(\S+) dstport=(\S+) dstintf="(\S+)" dstintfrole="(\S+)" </regex>
+ <order>srcip,srcname,srcport,srcintf,srcintfrole,dstip,dstport,dstintf,dstintfrole</order>
+</decoder>
+
+<decoder name="fortigate-custom1">
+ <parent>fortigate-custom</parent>
+ <regex offset="after_regex">srcip=(\S+) dstip=(\S+) srcport=(\S+) dstport=(\S+) srcintf="(\S+)" srcintfrole="(\S+)" dstintf="(\S+)" dstintfrole="(\S+)" </regex>
+ <order>srcip,dstip,srcport,dstport,srcintf,srcintfrole,dstport,dstintf,dstintfrole</order>
+</decoder>
+
+<decoder name="fortigate-custom1">
+ <parent>fortigate-custom</parent>
+ <regex offset="after_regex">srcip=(\S+) dstip=(\S+) srcport=(\S+) dstport=(\S+) </regex>
+ <order>srcip, dstip, srcport, dstport</order>
+</decoder>
+
+<decoder name="fortigate-custom1">
+ <parent>fortigate-custom</parent>
+ <regex offset="after_regex">srcip="(\S+)"|srcip=(\S+) </regex>
+ <order>srcip</order>
+</decoder>
+
+<decoder name="fortigate-custom1">
+ <parent>fortigate-custom</parent>
+ <regex offset="after_regex">dstip=(\S+) </regex>
+ <order>dstip</order>
+</decoder>
+
+<decoder name="fortigate-custom1">
+ <parent>fortigate-custom</parent>
+ <regex offset="after_regex">action="(\S+)" </regex>
+ <order>action</order>
+</decoder>
+
+<decoder name="fortigate-custom1">
+ <parent>fortigate-custom</parent>
+ <regex offset="after_regex">status="(\S+)" </regex>
+ <order>status</order>
+</decoder>
+
+<decoder name="fortigate-custom1">
+ <parent>fortigate-custom</parent>
+ <regex offset="after_regex">msg="(\.+)"$</regex>
+ <order>msg</order>
+</decoder>
