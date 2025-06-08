@@ -18,7 +18,7 @@ struct Args {
     #[arg(short, long, required_unless_present("pcap"))]
     iface: Option<String>,
 
-    /// Ruta al archivo JSON de fabricantes OUI (por defecto: mac-vendors-export.json)
+    /// Ruta al archivo JSON de fabricantes OUI (por defecto: mac-vendors-export.json) https://maclookup.app/downloads/json-database
     #[arg(short = 'j', long, default_value = "mac-vendors-export.json")]
     oui_db: String,
 }
