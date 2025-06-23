@@ -66,44 +66,6 @@ python3 fortisox.py firewall.conf reporte.md auditoria.xlsx
 
 ---
 
-## Ejemplo de Markdown
-
-```markdown
-# Documentación SOX - FortiGate
-- **Fuente:** `firewall.conf`
-- **Generado por:** fortisox.py
-- **Fecha:** 2025-06-23 14:35:00
-
-## Índice
-- [Información General](#información-general)
-- [Usuarios Administrativos](#usuarios-administrativos)
-...
-
-## Información General
-- **hostname**: `FGT-CORP-01`
-- **timezone**: `UTC+1`
-
-## Usuarios Administrativos
-| Usuario | Parámetro | Valor |
-|---------|-----------|-------|
-| admin   | accprofile| super_admin |
-...
-```
-
----
-
-## Estructura del Proyecto
-
-```
-fortisox.py     # Script principal
-README.md       # Documentación de uso
-config.conf     # Ejemplo de configuración FortiGate
-reporte.md      # Salida Markdown (ejemplo)
-auditoria.xlsx  # Salida Excel (ejemplo)
-```
-
----
-
 ## Autor
 
 Sergio Cayuqueo ([cayu@cayu.com.ar](mailto:cayu@cayu.com.ar))
