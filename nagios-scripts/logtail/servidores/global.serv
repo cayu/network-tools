@@ -1,0 +1,61 @@
+[configuracion]
+; yes | no
+activo	= yes
+; registros activos que se revisan
+;registros = messages,apache,daemon,auth-ssh,oracle-alert
+registros = tivoli-dsmsched
+
+
+[tivoli-dsmsched]
+mail	= Sergio.Cayuqueo@blablabla
+archivo	= /opt/tivoli/tsm/client/ba/bin/dsmsched.log
+etiqueta= tivoli-dsmsched
+;patron=*
+; formato del email
+;formato_mail    = html
+
+[auth-count]
+mail	= cayu@cayu.com.ar
+archivo	= /var/log/auth.log
+procesador = syslog_repeat_lines.pl
+etiqueta= AUTH
+; formato del email
+;formato_mail    = html
+
+[messages]
+mail	= 
+archivo	= /var/log/messages
+patron	= sergio
+etiqueta= MESSAGES
+
+[auth-ssh]
+mail	= 
+archivo	= /var/log/auth.log
+procesador = ssh.pl
+etiqueta= AUTH
+; formato del email
+formato_mail    = html
+
+[oracle-alert]
+mail	= 
+archivo	= /var/log/alert_OT2P1N1.log
+procesador = oracle_alert.pl
+patron  = ALTER DATABASE
+etiqueta= ORACLE
+
+[oradriver]
+mail	= 
+archivo	= /var/log/ORAdriver.log.1
+etiqueta= ORADRIVER
+
+[apache]
+mail	= 
+archivo	= /var/log/apache2/access.log.1
+patron	= ico
+etiqueta= APACHE
+
+[daemon]
+mail	= 
+archivo	= /var/log/daemon.log
+patron	= failed
+etiqueta= DAEMON
