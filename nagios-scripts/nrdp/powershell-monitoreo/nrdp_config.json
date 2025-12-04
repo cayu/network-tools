@@ -1,0 +1,6 @@
+{
+    "NRDPUrl": "http://TU_IP_NAGIOS/nrdp/",
+    "Token": "TU_TOKEN_SECRETO",
+    "User": "nagiosadmin",
+    "Password": "password_seguro"
+}
