@@ -19,3 +19,5 @@ GUÍA DE INSTALACIÓN Y SEGURIDAD
 4. AUTOMATIZACIÓN
    - Configure el Task Scheduler para ejecutar los scripts .ps1.
    - Asegúrese de que la tarea se ejecute como "SYSTEM" para que pueda leer el config.json protegido.
+
+Sergio Cayuqueo <cayu@cayu.com.ar>
