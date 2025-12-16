@@ -74,4 +74,4 @@ Sergio Cayuqueo ([cayu@cayu.com.ar](mailto:cayu@cayu.com.ar))
 
 ## Licencia
 
-MIT © Sergio Cayuqueo
+GPL © Sergio Cayuqueo
