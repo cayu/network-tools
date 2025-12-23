@@ -1,82 +1,114 @@
-# --- 1. CARGA DE CONFIGURACIÓN ---
+
+# --- 1. CONFIG ---
 $JsonPath = "$PSScriptRoot\nrdp_config.json"
 if (-not (Test-Path $JsonPath)) { Write-Error "Falta nrdp_config.json"; exit 1 }
 $Cfg = Get-Content $JsonPath -Raw -Encoding UTF8 | ConvertFrom-Json
 
 Import-Module "$PSScriptRoot\Send-NRDP.psm1" -Force
 
-# Función auxiliar para extraer datos de netsh con Regex
-function Get-Val($txt, $key) { ($txt | Select-String "$key\s*:\s*(.*)").Matches.Groups[1].Value.Trim() }
+# --- 2. FUNCIÓN MULTI-IDIOMA ---
+function Get-Val {
+    param (
+        [string]$Text,
+        [string[]]$Keys
+    )
+
+    foreach ($key in $Keys) {
+        $m = $Text | Select-String -Pattern "$key\s*:\s*(.+)"
+        if ($m) {
+            return $m.Matches[0].Groups[1].Value.Trim()
+        }
+    }
+    return "N/A"
+}
 
 try {
-    # --- 2. OBTENER DATOS DE HARDWARE (Netsh) ---
+    # --- 3. NETSH ---
     $rawInt = netsh mbn show interface | Out-String
-    $Nombre = Get-Val $rawInt "Name"
-    
-    if (-not $Nombre) { throw "No se detectó módem/SIM activo." }
-    
-    $rawSub = netsh mbn show subscriber interface="$Nombre" | Out-String
-    
-    # Extraemos datos clave
-    $Modelo    = Get-Val $rawInt "Model"
-    $IMEI      = Get-Val $rawInt "Device Id"
-    $SignalStr = Get-Val $rawInt "Signal"       # Ej: "85%"
-    $Estado    = Get-Val $rawInt "State"
-    $NumSIM    = Get-Val $rawSub "Telephone number"
-    $Proveedor = Get-Val $rawSub "Provider Name"
 
-    # Limpiamos el valor de señal para graficar (quitar el %)
-    $SignalVal = if ($SignalStr -match "(\d+)") { $matches[1] } else { 0 }
+    $Nombre = Get-Val $rawInt @("Name","Nombre")
+    if ($Nombre -eq "N/A") {
+        throw "No se detectó interfaz WWAN"
+    }
 
-    # --- 3. OBTENER TRÁFICO INSTANTÁNEO (WMI) ---
-    # Buscamos la interfaz de red asociada para medir velocidad
-    $adapter = Get-NetAdapter | Where-Object { $_.Name -eq $Nombre -or $_.InterfaceDescription -match $Modelo } | Select-Object -First 1
-    
-    $SpeedIn = 0; $SpeedOut = 0; $SpeedInMbps = 0; $SpeedOutMbps = 0
+    # --- 4. DATOS WWAN ---
+    $Datos = @{
+        # Identidad HW
+        IMEI        = Get-Val $rawInt @("Device Id","Id\. de dispositivo")
+        Fabricante  = Get-Val $rawInt @("Manufacturer","Fabricante")
+        Modelo      = Get-Val $rawInt @("Model","Modelo")
+        Firmware    = Get-Val $rawInt @("Firmware Version","Versión de firmware")
+        ClaseMovil  = Get-Val $rawInt @("Mobile class","Clase de teléfono móvil")
+        MAC         = Get-Val $rawInt @("Physical address","Dirección física")
+        TipoHW      = Get-Val $rawInt @("Device type","Tipo de dispositivo")
 
-    if ($adapter) {
-        # Usamos contadores WMI para obtener la velocidad exacta en este segundo
-        $perfName = $adapter.Name -replace '[^a-zA-Z0-9]', ''
-        $perf = Get-WmiObject Win32_PerfFormattedData_Tcpip_NetworkInterface | 
-                Where-Object { $_.Name -replace '[^a-zA-Z0-9]', '' -match $perfName } | Select-Object -First 1
-        
-        if ($perf) {
-            $SpeedIn  = ($perf.BytesReceivedPerSec * 8)
-            $SpeedOut = ($perf.BytesSentPerSec * 8)
-            $SpeedInMbps  = [math]::Round($SpeedIn / 1Mb, 2)
-            $SpeedOutMbps = [math]::Round($SpeedOut / 1Mb, 2)
+        # Estado / Red
+        Estado      = Get-Val $rawInt @("State","Estado")
+        Proveedor   = Get-Val $rawInt @("Provider Name","Nombre del proveedor")
+        Roaming     = Get-Val $rawInt @("Roaming","Itinerancia")
+
+        # Señal
+        SenalPct    = Get-Val $rawInt @("Signal","Señal")
+        RSSIraw     = Get-Val $rawInt @("RSSI/RSCP")
+    }
+
+    # --- 5. NORMALIZACIÓN SEÑAL ---
+    # % señal
+    $SignalPctVal = 0
+    if ($Datos.SenalPct -match "(\d+)") {
+        $SignalPctVal = [int]$matches[1]
+    }
+
+    # RSSI dBm
+    $RSSI = $null
+    if ($Datos.RSSIraw -match "\((-?\d+)\s*dBm\)") {
+        $RSSI = [int]$matches[1]
+    }
+
+    # --- 6. ESTADO ---
+    $State = 0
+    $Msg   = "OK"
+
+    if ($Datos.Estado -notin @("Connected","Conectado")) {
+        $State = 2
+        $Msg   = "CRITICAL - Desconectado"
+    }
+
+    if ($RSSI -ne $null -and $State -eq 0) {
+        if ($RSSI -lt -100) {
+            $State = 2
+            $Msg   = "CRITICAL - Señal muy débil"
+        }
+        elseif ($RSSI -lt -85) {
+            $State = 1
+            $Msg   = "WARNING - Señal baja"
         }
     }
 
-    # --- 4. DEFINIR ESTADO NAGIOS ---
-    # Estado simple: Si está conectado es OK. Si la señal es muy baja (<20%), es WARNING.
-    $State = 0; $Msg = "OK"
+    # --- 7. OUTPUT ---
+    $Output = "$Msg - Prov: $($Datos.Proveedor) IMEI: $($Datos.IMEI) Señal: $SignalPctVal% ($RSSI dBm)"
+    $Output += "`n[HW] $($Datos.Modelo) FW: $($Datos.Firmware) $($Datos.ClaseMovil) Roaming: $($Datos.Roaming)"
 
-    if ($Estado -ne "Connected" -and $Estado -ne "Conectado") {
-        $State = 2; $Msg = "CRITICAL (Sin Conexión)"
+    # --- 8. PERFDATA ---
+    $Perf = @()
+    $Perf += "signal_pct=$SignalPctVal%;20;10;0;100"
+    if ($RSSI -ne $null) {
+        $Perf += "rssi=$RSSI;-85;-100;-120;-50"
     }
-    elseif ($SignalVal -lt 20) {
-        $State = 1; $Msg = "WARNING (Baja Señal)"
-    }
 
-    # --- 5. FORMATO DE SALIDA ---
-    # Línea 1: Resumen rápido
-    $Output = "$Msg - $Proveedor (Señal: $SignalStr) - Tráfico: In ${SpeedInMbps}Mbps / Out ${SpeedOutMbps}Mbps"
-    
-    # Línea 2: Detalles de Inventario (Multilínea)
-    $Output += "`n[Hardware] Modelo: $Modelo | IMEI: $IMEI | SIM: $NumSIM"
-
-    # --- 6. PERFDATA (Para Graficar) ---
-    # Graficamos 3 cosas: Velocidad de Bajada, Subida y Fuerza de Señal
-    $Perf = "traffic_in=$($SpeedIn)bps;;;; traffic_out=$($SpeedOut)bps;;;; signal_strength=$($SignalVal)%;20;10;0;100"
-    
-    $Final = "$Output | $Perf"
-
+    $Final = "$Output | " + ($Perf -join " ")
 }
 catch {
-    $State = 3; $Final = "UNKNOWN - Error SIM Lite: $_"
+    $State = 3
+    $Final = "UNKNOWN - Error NETSH MBN: $_"
 }
 
-# --- 7. ENVÍO ---
-Send-NRDP -NRDPUrl $Cfg.NRDPUrl -Token $Cfg.Token -User $Cfg.User -Password $Cfg.Password `
-          -Service "SIM Status" -State $State -Output $Final
+# --- 9. ENVÍO NRDP ---
+Send-NRDP `
+    -NRDPUrl $Cfg.NRDPUrl `
+    -Token $Cfg.Token `
+    -User $Cfg.User `
+    -Password $Cfg.Password `
+    -Service "WWAN Radio" `
+    -State $State `
+    -Output $Final
