@@ -8,7 +8,7 @@ GUÍA DE INSTALACIÓN Y SEGURIDAD
    - ¡No necesita editar ningún archivo .ps1!
 
 2. INSTALACIÓN
-   - Mueva esta carpeta a una ruta segura, ej: C:\Program Files\NRDP_Monitoreo\
+   - Mueva esta carpeta a una ruta segura, ej: C:\NRDP_Monitoreo\
 
 3. SEGURIDAD (IMPORTANTE)
    - Haga clic derecho en 'nrdp_config.json' -> Propiedades -> Seguridad.
