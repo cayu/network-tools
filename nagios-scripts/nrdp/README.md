@@ -29,9 +29,9 @@ En la versión original, el script utilizaba `tempnam()` para crear archivos fí
 **La nueva implementación:**
 1. Obtiene la ruta de la tubería de comandos (`command_file`) directamente desde `nagios.cfg`.
 2. Construye el comando externo estándar en una sola línea:
-   ```text
+```text
 [<timestamp>] PROCESS_SERVICE_CHECK_RESULT;<host>;<service>;<state>;<output>
-   ```
+```
 3. Abre el *pipe* en modo escritura (`w`) y envía la cadena, evitando el sistema de archivos por completo.
 
 ### 2. Corrección de Formato (Parsing)
