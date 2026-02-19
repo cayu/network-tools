@@ -16,7 +16,9 @@ if (-not (Test-Path $JsonPath)) {
 $Cfg = Get-Content $JsonPath -Raw -Encoding UTF8 | ConvertFrom-Json
 
 # Datos del Host
-$Hostname = $env:COMPUTERNAME
+# El nombre NetBIOS, que tiene un límite estricto de 15 caracteres heredado de sistemas antiguos, asi que la cambiamos
+# $Hostname = $env:COMPUTERNAME
+$Hostname = (hostname).Trim()
 $State    = 0                          # 0=UP, 1=DOWN, 2=UNREACHABLE
 $Output   = "Host is UP (NRDP Agent)"  # Mensaje que se verá en Nagios
 
