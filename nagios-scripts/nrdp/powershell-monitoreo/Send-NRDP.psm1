@@ -4,7 +4,7 @@ function Send-NRDP {
         [Parameter(Mandatory=$true)] [string]$Token,
         [string]$User,      
         [string]$Password,  
-        [string]$Hostname = $env:COMPUTERNAME,
+        [string]$Hostname = (hostname).Trim(),
         [Parameter(Mandatory=$true)] [string]$Service,
         [Parameter(Mandatory=$true)] [int]$State,
         [Parameter(Mandatory=$true)] [string]$Output,
